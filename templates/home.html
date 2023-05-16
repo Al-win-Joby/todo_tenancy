@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <title>Todo List</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .todo-container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .todo-input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        .todo-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .todo-item input[type="checkbox"] {
+            margin-right: 10px;
+        }
+        .todo-item .todo-text {
+            flex-grow: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="todo-container">
+        <div style="display:flex; justify-content:space-around">
+                    
+            <h1>Todo List</h1>
+            {% csrf_token %}
+            <a href="{% url 'logout' %}"><button class="logout-btn" >Logout</button></a>
+        </div>
+        <input type="text" class="todo-input" id="todo-input" placeholder="Add a new task">
+        <button onclick="addTodo()">Add</button>
+        <ul id="todo-list">
+            {% for task in tasks%}
+            <li>
+                <div class="todo-item">
+                    <input type="checkbox" {% if task.complete == True %}checked{% endif %} onclick="checkedfun({{task.id}})">
+                    <span class="todo-text">{{task.title}}</span>
+                    
+                    <button onclick="deletefun({{task.id}})"> Delete </button>
+                </div>
+            </li>
+            {% endfor %}
+
+        </ul>
+    </div>
+
+    <script>
+        function deletefun(id){
+            console.log(id)
+            var token = $('input[name=csrfmiddlewaretoken]').val();
+            $.ajax({
+                method:'POST',
+                url:"delete",
+                data:{
+                    id:id,
+                    csrfmiddlewaretoken:token,
+                },
+                
+                success:function(response){
+                    
+                    if (response.status){
+                        window.location.reload()
+                    }
+                }
+            })
+
+        }
+
+        function checkedfun(id){
+            console.log(id)
+            var token = $('input[name=csrfmiddlewaretoken]').val();
+            $.ajax({
+                method:'POST',
+                url:"checkbox",
+                data:{
+                    id:id,
+                    csrfmiddlewaretoken:token,
+                },
+                
+                success:function(response){
+                    
+                    if (response.status){
+
+                    }
+                }
+            })
+        }
+
+        function addTodo() {
+            var todoInput = document.getElementById("todo-input");
+            var todoText = todoInput.value.trim();
+            if (todoText !== "") {
+                var listItem = document.createElement("li");
+                listItem.innerHTML = `
+                    <div class="todo-item">
+                        <input type="checkbox">
+                        <span class="todo-text">${todoText}</span>
+                        <button> Delete </button>
+                    </div>
+                `;
+                document.getElementById("todo-list").appendChild(listItem);
+                todoInput.value = "";
+                var token = $('input[name=csrfmiddlewaretoken]').val();
+                console.log(token)
+                $.ajax({
+                    method:'POST',
+                    url:"add1",
+                    data:{
+                        todoText:todoText,
+                        csrfmiddlewaretoken:token,
+                    },
+                    
+                    success:function(response){
+                        
+                        if (response.status){
+                            
+                        }
+                    }
+                })
+                
+            ////
+            }
+        }
+    </script>
+</body>
+</html>
